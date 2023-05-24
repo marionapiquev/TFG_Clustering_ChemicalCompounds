@@ -1,5 +1,5 @@
 # TFG: Characterization of commercial chemical compounds with pharmacological activity using clustering techniques.
-In this repository, I provide the code used to carry out my study on "Clustering of Chemical Compounds". You will find a variety of clustering algorithms implemented in R. These algorithms include hierarchical clustering, k-means clustering, and density-based clustering. In addition, you will find scripts for data preprocessing and visualization, as well as datasets.
+In this repository, I provide the code used to carry out my study on "Characterization of commercial chemical compounds with pharmacological activity using clustering techniques". You will find a variety of clustering algorithms implemented in R. These algorithms include hierarchical clustering, k-means clustering, and density-based clustering. In addition, you will find scripts for data preprocessing and visualization, as well as datasets.
 
 ## Project Files Description
 
