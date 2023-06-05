@@ -18,3 +18,6 @@ This project includes two directories, one for Scripts and another for Data.
 - `df_molecular_descriptors.csv`: Dataframe obtained using *extract_molecular_descriptors* function from `get_molecular_descriptors.R` file. It contains the molecular descriptors of 9213 chemical compounds.
 - `df_molecular_descriptors_scaled.csv`: Dataframe obtained executing the `data_preprocessing.R` file. It contains the molecular descriptors of 9213 chemical compounds after data preprocessing.
 - `df_smiles.csv`: Dataframe obtained using *extract_smiles* function from `get_molecular_descriptors.R` file. It contains the smiles of 9213 chemical compounds.
+- `df_info_mols.csv`: Dataframe that contains additional information about each chemical compound such as generic name and phase.
+
+The original SDF file can't be uploaded due to licensing reasons.
