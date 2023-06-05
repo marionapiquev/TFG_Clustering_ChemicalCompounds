@@ -85,6 +85,15 @@ mols_similarity_matrix <- function(df_dbscan, cnames, nclusters){
   }
 }
 
+#Function that returns the PCA 
+pca <- function(df){
+  pca.DF <- princomp(df) 
+  print(summary(pca.DF))
+  pca_DF <- as.data.frame(pca.DF$scores)
+  return(pca_DF)
+}
+
+#Hyperparameter Search
 #Function that calculates the performance of the HDBSCAN algorithm for different parameters values based on the Tanimoto Similarity
 parameters_hdbscan <- function(df, minPts){
   mol_similarity_hdbscan <- data.frame(minPts = integer(), nclusters = integer(), non_class = integer(), cluster_max_size = integer(), Similarity = double())
@@ -102,7 +111,7 @@ parameters_hdbscan <- function(df, minPts){
     if (nclusters > 0){
       for (k in 1:nclusters){
         cluster <- filter(df_hdbscan, cluster == k)
-        if (nrow(cluster) < 3000 & nrow(cluster) > 1){
+        if (nrow(cluster) < 9000 & nrow(cluster) > 1){
           c_id <- cluster[cnames[cnames %in% c("id")]]
           c_smiles <- filter(smiles, id %in% as.list(c_id)$id)
           m <- ms.compute.sim.matrix(c_smiles$smile, format = 'SMILES', fp.type='pubchem', sim.method='tanimoto')
@@ -124,19 +133,7 @@ parameters_hdbscan <- function(df, minPts){
   return(mol_similarity_hdbscan)
 }
 ########################################
-pca <- function(df){
-  pca.DF <- princomp(df) 
-  print(summary(pca.DF))
-  #Show the percentage of variances explained by each principal component.
-  fviz_eig(pca.DF)
-  #Graph of individuals (Individuals with a similar profile are grouped together)
-  fviz_pca_ind(pca.DF,
-               col.ind = "cos2", 
-               gradient.cols = c("#00AFBB", "#E7B800", "#FC4E07"),
-               repel = TRUE     # Avoid text overlapping
-  )
-  pca_DF <- as.data.frame(pca.DF$scores)
-}
+#DATA PREPARATION (PCA)
 
 #Prepare the data for clustering
 DF <- Df_scaled #Choose the dataframe you want to use
@@ -144,14 +141,14 @@ cnames <- colnames(DF)
 df <- DF[,cnames[!cnames %in% c("X","id")]]
 
 pca_DF <- pca(df)
-pca_DF <- pca_DF[,0:10]
+pca_DF <- pca_DF[,0:10]#Choose number of principle components
 p <- plot_ly(pca_DF, x=pca_DF$Comp.1, y=pca_DF$Comp.2, 
              z=pca_DF$Comp.3) %>% add_markers(size=1.5)
 print(p)
 ########################################
 #HDBSCAN
 #Prepare the data for clustering
-DF <- pca_DF
+DF <- scaled_DF
 cnames <- colnames(DF)
 df <- DF[,cnames[!cnames %in% c("X","id")]]
 
