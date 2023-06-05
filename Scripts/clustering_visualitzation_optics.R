@@ -26,14 +26,13 @@ setwd("/Users/MarionaP/Desktop/TFG2")
 Df_scaled <- read.csv("df_molecular_descriptors_scaled.csv")
 df_original <- read.csv("df_molecular_descriptors.csv")
 smiles <- read.csv("df_smiles.csv")
-df_filter <- read.csv("df_molecular_descriptors_scaled_filtered.csv")
 df_info <- read.csv("df_info_mols.csv")
 ########################################
 #FUNCTIONS
 #Function to visualize molecules for each cluster
 visualize_cluster_mols <- function(df_dbscan, cnames, nclusters){
   for (i in 1:nclusters){
-    cluster1 <- filter(df_dbscan, cluster == i)
+    cluster1 <- filter(df_optics, cluster == i)
     c1_id <- cluster1[cnames[cnames %in% c("id")]]
     c1_smiles <- filter(smiles, id %in% as.list(c1_id)$id)
     c1_sdf <- c()
@@ -74,16 +73,27 @@ mols_similarity <- function(df_dbscan, cnames, nclusters){
 
 #Function that computes Tanimoto coeficient using a similarity matrix.
 mols_similarity_matrix <- function(df_dbscan, cnames, nclusters){
+  mol_similarity <- data.frame(cl =  double(), Tanimoto_Coef = double())
   for (k in 1:nclusters){
     cluster <- filter(df_dbscan, cluster == k)
     c_id <- cluster[cnames[cnames %in% c("id")]]
     c_smiles <- filter(smiles, id %in% as.list(c_id)$id)
-    m <- ms.compute.sim.matrix(c_smiles$smile, format = 'SMILES', fp.type='pubchem', sim.method='tanimoto')
+    m <- ms.compute.sim.matrix(c_smiles$smile, format = 'SMILES', fp.type='extended', sim.method='tanimoto')
     #print(m)
     m[lower.tri(m, diag=TRUE)] <- 0
     similarity <- sum(m)/sum(rowCounts(m > 0))
     cat('\nTanimoto coef mean cluster',k,':',similarity)
+    mol_similarity[nrow(mol_similarity) + 1,] <- data.frame(cl = k,Tanimoto_Coef = similarity)
   }
+  return(mol_similarity)
+}
+
+#Function that returns the PCA 
+pca <- function(df){
+  pca.DF <- princomp(df) 
+  print(summary(pca.DF))
+  pca_DF <- as.data.frame(pca.DF$scores)
+  return(pca_DF)
 }
 
 #Function that calculates the performance of the DBSCAN algorithm for different parameters values based on the Tanimoto Similarity
@@ -132,34 +142,33 @@ parameters_dbscan <- function(d, eps, minPts, eps_cl){
 }
 
 ########################################
-pca <- function(df){
-  pca.DF <- princomp(df) 
-  print(summary(pca.DF))
-  #Show the percentage of variances explained by each principal component.
-  fviz_eig(pca.DF)
-  #Graph of individuals (Individuals with a similar profile are grouped together)
-  fviz_pca_ind(pca.DF,
-               col.ind = "cos2", 
-               gradient.cols = c("#00AFBB", "#E7B800", "#FC4E07"),
-               repel = TRUE     # Avoid text overlapping
-  )
-  pca_DF <- as.data.frame(pca.DF$scores)
-}
-
+#DATA PREPARATION (PCA)
 #Prepare the data for clustering
 DF <- Df_scaled #Choose the dataframe you want to use
 cnames <- colnames(DF)
 df <- DF[,cnames[!cnames %in% c("X","id")]]
 
 pca_DF <- pca(df)
-pca_DF <- pca_DF[,0:10]
+pca_DF <- pca_DF[,0:2] #Choose number of principle components
+pca_DF['id'] <- DF$id
 p <- plot_ly(pca_DF, x=pca_DF$Comp.1, y=pca_DF$Comp.2, 
              z=pca_DF$Comp.3) %>% add_markers(size=1.5)
 print(p)
+
+#We have found that there is an outlier, we remove this molecule
+outlier <- 'DB11588'
+pca_DF <- pca_DF %>%filter(id!=outlier)
+scaled_DF <- Df_scaled %>%  filter(id!=outlier)
+df_original <- df_original %>%  filter(id!=outlier)
+smiles <- smiles %>%  filter(id!=outlier)
+df_info <- df_info %>%  filter(charMA.DRUGBANK_ID!=outlier)
+p <- plot_ly(pca_DF, x=pca_DF$Comp.1, y=pca_DF$Comp.2, 
+             z=pca_DF$Comp.3) %>% add_markers(size=1.5)
+p
 ########################################
 #OPTICS
 #Prepare the data for clustering
-DF <- pca_DF
+DF <- scaled_DF #Choose the dataframe you want to use
 cnames <- colnames(DF)
 df <- DF[,cnames[!cnames %in% c("X","id")]]
 
@@ -167,7 +176,7 @@ df <- DF[,cnames[!cnames %in% c("X","id")]]
 dist_matrix <- daisy(df, metric = "euclidean")
 d <- dist(dist_matrix)
 optics_res <- optics(d, eps = 2, minPts = 2)
-optics_res <- extractDBSCAN(optics_res, eps_cl = 2)
+optics_res <- extractDBSCAN(optics_res, eps_cl = 1)
 
 #Add clustering results to a dataframe
 df_optics <- df_original
@@ -186,14 +195,15 @@ fig <- fig %>% layout(scene = list(xaxis = list(title = 'MLogP'),yaxis = list(ti
 fig
 
 #Visulaize the molecules of each cluster
-visualize_cluster_mols(df_optics, cnames, nclusters)
+visualize_cluster_mols(df_optics, colnames(df_optics), nclusters)
 
 #Compute the similarity between molecules
 #Tanimoto and Overlap coeficients (If the size of the clusters is big use the other function mols_similarity_matrix())
 df_mols_similarity <- mols_similarity(df_optics, cnames, nclusters)
 
 #Tanimoto coeficient
-mols_similarity_matrix(df_optics, cnames, nclusters)
+df_mols_similarity <- mols_similarity_matrix(df_optics, cnames, nclusters)
+#write.csv(df_mols_similarity, "mols_similarity.csv")
 
 #Get info of the clusters
 #SMILES
@@ -221,8 +231,9 @@ for (i in 1:nclusters){
 }
 df_clust_of_interest <- filter(df_info, cluster %in% interest_cluster)
 
+count <- df_clust_of_interest %>% dplyr::count(cluster)
+
 #Visualize the drugs of each cluster
-colnames(df_clust_of_interest)[2] <- "id"
 names <- colnames(df_clust_of_interest)
 for (i in interest_cluster){
   cluster1 <- filter(df_clust_of_interest, cluster == i)
@@ -245,7 +256,7 @@ df_interest_similarity <- mols_similarity(df_clust_of_interest, names, length(in
 ########################################
 #PERFORMANCE OF THE ALGORITHM FOR DIFFERENT PARAMETER VALUES
 #Calculate the performance of the algorithm with different eps and minPts based on the similarity between molecules on the same cluster
-dist_matrix <- daisy(pca_DF, metric = "euclidean")
+dist_matrix <- daisy(df, metric = "euclidean")
 d <- dist(dist_matrix)
 eps <- seq(2, 5, by=1)
 minPts <- seq(2, 10, by=1)
