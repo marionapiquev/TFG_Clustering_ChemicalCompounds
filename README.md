@@ -12,7 +12,7 @@ This project includes two directories, one for Scripts and another for Data.
 - `HC_Clustering.R`: Includes a variety of functions to perform, analyze and visualize the clustering results of Hierarchical Clustering using molecular descriptors.
 - `clustering_visualitzation_dbscan.R`: Includes a variety of functions to analyze and visualize the clustering results of DBSCAN.
 - `clustering_visualitzation_hdbscan.R`: Includes a variety of functions to analyze and visualize the clustering results of HDBSCAN.
--`clustering_visualitzation_optics.R`: Includes a variety of functions to analyze and visualize the clustering results of OPTICS.
+- `clustering_visualitzation_optics.R`: Includes a variety of functions to analyze and visualize the clustering results of OPTICS.
 - `Clustering_Fingerprints.R`: Includes a variety of clustering algorithms implemented to cluster chemical compounds based on their fingerprints. These algorithms are hierarchical clustering, K-means, MDS+HC and MDS+K-Means.
 #### Data:
 - `df_molecular_descriptors.csv`: Dataframe obtained using *extract_molecular_descriptors* function from `get_molecular_descriptors.R` file. It contains the molecular descriptors of 9213 chemical compounds.
