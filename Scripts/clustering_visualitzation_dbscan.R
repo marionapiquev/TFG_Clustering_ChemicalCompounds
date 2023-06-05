@@ -85,6 +85,14 @@ mols_similarity_matrix <- function(df_dbscan, cnames, nclusters){
   }
 }
 
+#Function that returns the PCA 
+pca <- function(df){
+  pca.DF <- princomp(df) 
+  print(summary(pca.DF))
+  pca_DF <- as.data.frame(pca.DF$scores)
+  return(pca_DF)
+}
+
 #Function that calculates the performance of the DBSCAN algorithm for different parameters values based on the Tanimoto Similarity
 parameters_dbscan <- function(df, eps, minPts){
   mol_similarity <- data.frame(eps = double(), minPts = integer(), nclusters = integer(), non_class = integer(), cluster_max_size = integer(), Similarity = double())
@@ -128,39 +136,24 @@ parameters_dbscan <- function(df, eps, minPts){
 }
 
 ########################################
-pca <- function(df){
-  pca.DF <- princomp(df) 
-  print(summary(pca.DF))
-  #Show the percentage of variances explained by each principal component.
-  fviz_eig(pca.DF)
-  #Graph of individuals (Individuals with a similar profile are grouped together)
-  fviz_pca_ind(pca.DF,
-               col.ind = "cos2", 
-               gradient.cols = c("#00AFBB", "#E7B800", "#FC4E07"),
-               repel = TRUE     # Avoid text overlapping
-  )
-  pca_DF <- as.data.frame(pca.DF$scores)
-}
-
+#DATA PREPARATION (PCA)
 #Prepare the data for clustering
 DF <- Df_scaled #Choose the dataframe you want to use
 cnames <- colnames(DF)
 df <- DF[,cnames[!cnames %in% c("X","id")]]
 
 pca_DF <- pca(df)
-pca_DF <- pca_DF[,0:10]
+pca_DF <- pca_DF[,0:2] #Choose number of principle components
 p <- plot_ly(pca_DF, x=pca_DF$Comp.1, y=pca_DF$Comp.2, 
              z=pca_DF$Comp.3) %>% add_markers(size=1.5)
 print(p)
 ########################################
 #DBSCAN
 #Prepare the data for clustering
-DF <- pca_DF
+DF <-  Df_scaled #Choose the dataframe you want to use
 cnames <- colnames(DF)
 df <- DF[,cnames[!cnames %in% c("X","id")]]
 
-#dbscan::kNNdistplot(df, k =  2)
-#abline(h = 2, lty = 2)
 #Calculate the performance of the algorithm with different eps and minPts based on the similarity between molecules on the same cluster
 eps <- seq(2, 10, by=1)
 minPts <- seq(2, 12, by=1)
@@ -176,10 +169,6 @@ plot_dbscan_clusters <- ggplot(param_similarity, aes(eps, nclusters, colour = fa
 plot_dbscan_clusters
 
 #Perform the clustering
-#BO: eps = 2, minPts = 10
-#df_filter (small): eps = 5, minPts = 5
-#df_filter (small, aromatic): eps = 6, minPts = 5
-#BO BO: eps = 2, minPts = 5
 dbscan_result <- dbscan(df,eps = 2, minPts = 5)
 
 #Add clustering results to a dataframe
@@ -206,11 +195,4 @@ df_mols_similarity <- mols_similarity(df_dbscan, cnames, nclusters)
 #Tanimoto coeficient
 mols_similarity_matrix(df_dbscan, cnames, nclusters)
 
-for (k in 1:nclusters){
-  df_clusters <- filter(df_mols_similarity, cluster == 1)
-  ggplot(df_clusters, aes(mol1, mol2, fill= Tanimoto_Coef)) + 
-    geom_tile() +
-    scale_fill_gradient(low="white", high="blue") +
-    theme_ipsum()
-}
 
