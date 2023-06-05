@@ -8,8 +8,12 @@ This project includes two directories, one for Scripts and another for Data.
 #### Scripts:
 - `get_molecular_descriptors.R`: Includes all functions required to extract molecular descriptors.
 - `data_preprocessing.R`: Script with data transformation process implemented to prepare data for clustering.
-- `KMeans_Clustering.R`: Includes a variety of functions to perform, analyze and visualize the clustering results of K-Means.
-- `HC_Clustering.R`: Includes a variety of functions to perform, analyze and visualize the clustering results of Hierarchical Clustering.
+- `KMeans_Clustering.R`: Includes a variety of functions to perform, analyze and visualize the clustering results of K-Means using molecular descriptors.
+- `HC_Clustering.R`: Includes a variety of functions to perform, analyze and visualize the clustering results of Hierarchical Clustering using molecular descriptors.
+- `clustering_visualitzation_dbscan.R`: Includes a variety of functions to analyze and visualize the clustering results of DBSCAN.
+- `clustering_visualitzation_hdbscan.R`: Includes a variety of functions to analyze and visualize the clustering results of HDBSCAN.
+-`clustering_visualitzation_optics.R`: Includes a variety of functions to analyze and visualize the clustering results of OPTICS.
+- `Clustering_Fingerprints.R`: Includes a variety of clustering algorithms implemented to cluster chemical compounds based on their fingerprints. These algorithms are hierarchical clustering, K-means, MDS+HC and MDS+K-Means.
 #### Data:
 - `df_molecular_descriptors.csv`: Dataframe obtained using *extract_molecular_descriptors* function from `get_molecular_descriptors.R` file. It contains the molecular descriptors of 9213 chemical compounds.
 - `df_molecular_descriptors_scaled.csv`: Dataframe obtained executing the `data_preprocessing.R` file. It contains the molecular descriptors of 9213 chemical compounds after data preprocessing.
