@@ -14,6 +14,7 @@ This project includes two directories, one for Scripts and another for Data.
 - `clustering_visualitzation_hdbscan.R`: Includes a variety of functions to analyze and visualize the clustering results of HDBSCAN.
 - `clustering_visualitzation_optics.R`: Includes a variety of functions to analyze and visualize the clustering results of OPTICS.
 - `Clustering_Fingerprints.R`: Includes a variety of clustering algorithms implemented to cluster chemical compounds based on their fingerprints. These algorithms are hierarchical clustering, K-means, MDS+HC and MDS+K-Means.
+- `Validation.ipynb`: Jupiter Notebook that includes the supervised learning validation for question 1.
 #### Data:
 - `df_molecular_descriptors.csv`: Dataframe obtained using *extract_molecular_descriptors* function from `get_molecular_descriptors.R` file. It contains the molecular descriptors of 9213 chemical compounds.
 - `df_molecular_descriptors_scaled.csv`: Dataframe obtained executing the `data_preprocessing.R` file. It contains the molecular descriptors of 9213 chemical compounds after data preprocessing.
