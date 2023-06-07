@@ -62,7 +62,7 @@ fp.dist <- 1 - fp.sim
 
 #MDS
 fit <- isoMDS(dist(fp.dist),k=2)
-df_mds <- as.data.frame(mds[0:1])
+df_mds <- as.data.frame(fit[0:1])
 colnames(df_mds) <- c("Dim.1", "Dim.2")
 #write.csv(df_mds, "mds.csv")
 p <- plot_ly(df_mds, x=df_mds$Dim.1, y=df_mds$Dim.2) %>% add_markers(size=1.5)
